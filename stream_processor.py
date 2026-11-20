@@ -3,7 +3,7 @@ import glob
 import urllib.request
 import jdk
 
-# --- 1. Automated Windows Environment Configuration (JDK 11 & Hadoop Winutils) ---
+# 1. Automated Windows Environment Configuration (JDK 11 & Hadoop Winutils) 
 java_exe = next(
     (p for pat in [r"C:\Program Files\Eclipse Adoptium\**\java.exe", os.path.expanduser(r"~\.jdk\**\java.exe")]
      for p in glob.glob(pat, recursive=True)),
@@ -41,7 +41,7 @@ from pyspark.sql.functions import (
 )
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType, TimestampType
 
-# --- 2. Initialize Spark Session ---
+#2. Initialize Spark Session 
 spark = SparkSession.builder \
     .appName("EnvironmentalTelemetryAnomalyEngine") \
     .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.0") \
@@ -50,7 +50,7 @@ spark = SparkSession.builder \
 
 spark.sparkContext.setLogLevel("WARN")
 
-# --- 3. Define Telemetry Schema & Stream Source ---
+#3. Define Telemetry Schema & Stream Source 
 USE_KAFKA = False  # Set to True when local Kafka broker is running on localhost:9092
 OUTPUT_CSV = "anomalies_detected.csv"
 
@@ -88,7 +88,7 @@ else:
             expr("55.0 + 10.0 * cos(value)").cast("double").alias("humidity")
         )
 
-# --- 4. Sliding Window Aggregation & Z-Score Anomaly Detection ---
+#4. Sliding Window Aggregation & Z-Score Anomaly Detection
 windowed_stats = parsed_df \
     .withWatermark("timestamp", "10 minutes") \
     .groupBy(
@@ -127,7 +127,7 @@ anomalies = windowed_stats.withColumn(
     "severity"
 )
 
-# --- 5. Dual Sink: Real-Time Console Display + Persistent CSV Logging ---
+#5. Dual Sink: Real-Time Console Display + Persistent CSV Logging
 def process_anomaly_batch(batch_df, batch_id):
     # Convert Spark TimestampType columns to strings to avoid Pandas 2.x datetime64 casting errors
     formatted_batch_df = batch_df \
